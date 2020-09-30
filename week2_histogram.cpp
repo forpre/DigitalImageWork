@@ -1,43 +1,52 @@
 #include<opencv2/opencv.hpp>
-#include<opencv2/highgui.hpp>
-#include<opencv2/imgproc.hpp>
 #include<iostream>
 using namespace cv;
 using namespace std;
 
 int main()
 {
-	Mat srcMat = imread("D:\\picture\\timg.jpg"); //¼ÓÔØ²¢ÏÔÊ¾Ô­Í¼
-	int height = srcMat.rows; //ĞĞÊı
-	int width = srcMat.cols; //Ã¿ĞĞÏñËØµÄ×ÜÏñËØÊıÁ¿
-	float histgram[256] = {0};
-	Mat dstimage(256, 256, CV_8U, Scalar(255));
+	Mat srcMat = imread("D:\\picture\\123.jpg"); //åŠ è½½å¹¶æ˜¾ç¤ºåŸå›¾
+	int height = srcMat.rows; //è¡Œæ•°
+	int width = srcMat.cols; //æ¯è¡Œåƒç´ çš„æ€»åƒç´ æ•°é‡
+	float histgram[256] = {0}; //å­˜å‚¨æ•°å€¼ä¸ªæ•°
+	float Redch[256] = { 0 };
+	float Greench[256] = { 0 };
+	float Bluech[256] = { 0 };
+	Mat dstimage(256, 256, CV_8UC3, Scalar(255,255,255));//å„é€šé“å›¾åƒ
+	Mat Redimage(256, 256, CV_8UC3, Scalar(255,255,255));
+	Mat Greenimage(256, 256, CV_8UC3, Scalar(255,255,255));
+	Mat Blueimage(256, 256, CV_8UC3, Scalar(255,255,255));
 	int c;
 	int count;
-	for (int j = 0; j<height; j++) //±éÀúÏñËØ
+	for (int j = 0; j<height; j++) //éå†åƒç´ ï¼Œç»Ÿè®¡ä¸ªæ•°
 	{ 
 		for (int i = 0; i<width; i++) 
 		{ 
-			int gray = saturate_cast<uchar>(srcMat.at<Vec3b>(j,i)[2]*0.2989+ srcMat.at<Vec3b>(j, i)[1] * 0.5870+ srcMat.at<Vec3b>(j, i)[0] * 0.1140);//RGB×ª»Ò¶ÈÖµ
-			histgram[gray] = histgram[gray] + 1; 
-		}	//µ¥ĞĞ´¦Àí½áÊø 
-		waitKey(0);
+			int gray = saturate_cast<uchar>(srcMat.at<Vec3b>(j,i)[2]*0.2989+ srcMat.at<Vec3b>(j, i)[1] * 0.5870+ srcMat.at<Vec3b>(j, i)[0] * 0.1140);//RGBè½¬ç°åº¦å€¼
+			histgram[gray]++; 
+			Redch[srcMat.at<Vec3b>(j, i)[2]]++;
+			Greench[srcMat.at<Vec3b>(j, i)[1]]++;
+			Bluech[srcMat.at<Vec3b>(j, i)[0]]++;
+		}	//å•è¡Œå¤„ç†ç»“æŸ 
 	} 
+	int scale = 5000; //åˆ»åº¦
+	//å½’ä¸€åŒ–å¤„ç†
 	for ( c = 0; c < 256; c++)
 	{
 		histgram[c] = histgram[c] / (height*width);
+		Redch[c] = Redch[c] / (height*width);
+		Greench[c] = Greench[c] / (height*width);
+		Bluech[c] = Bluech[c] / (height*width);
+
+		//ç”»å‡ºç›´æ–¹å›¾
+		line(dstimage, Point(c, 256), Point(c, 256 - histgram[c] * scale), CV_RGB(0, 0, 0), 1, 8, 0);
+		line(Redimage, Point(c, 256), Point(c, 256 - Redch[c] * scale), CV_RGB(255, 0, 0), 1, 8, 0);
+		line(Greenimage, Point(c, 256), Point(c, 256 - Greench[c] * scale), CV_RGB(0, 255, 0), 1, 8, 0);
+		line(Blueimage, Point(c, 256), Point(c, 256 - Bluech[c] * scale), CV_RGB(0, 0, 255), 1, 8, 0);
 	}
-	Point pt1;
-	Point pt2;
-	int scale = 1300;
-	for (count = 0; count < 256; count++)
-	{
-		pt1.x = count;
-		pt1.y = 256;
-		pt2.x = count;
-		pt2.y = 256-histgram[count] * scale;
-		line(dstimage,pt1,pt2,CV_RGB(255,0,0),1,8,0);
-	}
-	imshow("Ö±·½Í¼",dstimage);
+	imshow("ç°åº¦å€¼ç›´æ–¹å›¾",dstimage);
+	imshow("çº¢è‰²ç›´æ–¹å›¾", Redimage);
+	imshow("ç»¿è‰²ç›´æ–¹å›¾", Greenimage);
+	imshow("è“è‰²ç›´æ–¹å›¾", Blueimage);
 	waitKey(0);
 }
